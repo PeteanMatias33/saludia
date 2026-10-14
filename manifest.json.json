@@ -1,0 +1,1 @@
+{"name":"SaludIA","short_name":"SaludIA","description":"Tu salud a un click","start_url":"./index.html","scope":"./","display":"standalone","background_color":"#0a9a63","theme_color":"#0a9a63","icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]}
