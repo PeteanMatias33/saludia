@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a9a63">
+<title>SaludIA</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#e4eef1;--card:#fff;--ink:#12303b;--mut:#587480;--pri:#0b6e83;--pi:#fff;--sos:#d62839;--ok:#2f9e6b;--wa:#f0a500;--line:#cfdfe4;--off:#d9e4e8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#081318;--card:#13252d;--ink:#e6f1f4;--mut:#93aab4;--pri:#3cb4cf;--pi:#06222a;--line:#244250;--off:#22363e}}
+:root[data-theme="dark"]{--bg:#081318;--card:#13252d;--ink:#e6f1f4;--mut:#93aab4;--pri:#3cb4cf;--pi:#06222a;--line:#244250;--off:#22363e}
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;justify-content:center}
+h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif;margin:0}
+#app{position:relative;width:100%;max-width:440px;height:100%;display:flex;flex-direction:column;background:var(--bg)}
+@media (min-width:500px){#app{height:min(860px,100%);margin:auto;border:1px solid var(--line);border-radius:28px;overflow:hidden}}
+button{font:inherit;cursor:pointer}
+/* splash */
+#sp{position:fixed;inset:0;z-index:20;background:#0a9a63;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;transition:opacity .6s,visibility .6s}
+#sp.out{opacity:0;visibility:hidden}
+#sp svg{width:130px;opacity:0;animation:spin 2s cubic-bezier(.1,.75,.2,1) forwards}
+#sp h2{font-size:2.8rem;font-weight:800;letter-spacing:-.02em;margin-top:18px;opacity:0;animation:up .6s 1.9s forwards}
+#sp p{margin:6px 0 0;font-size:1.05rem;opacity:0;animation:up .6s 2.3s forwards}
+@keyframes spin{from{transform:rotate(-900deg) scale(.3);opacity:0}15%{opacity:1}to{transform:rotate(0) scale(1);opacity:1}}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){#sp svg,#sp h2,#sp p{animation:none;opacity:1}.sosbtn,.dots span{animation:none}}
+header{padding:12px 12px 8px;display:flex;align-items:center;gap:8px}
+header h1{font-size:1.4rem;font-weight:800;letter-spacing:-.02em;flex:1}
+.ib{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;width:40px;height:40px;font-size:1.15rem}
+.pill{font-size:.75rem;padding:3px 10px;border-radius:99px;background:var(--off);color:var(--mut)}
+.views{flex:1;min-height:0;position:relative}
+section{position:absolute;inset:0;display:none;flex-direction:column;padding:0 14px 10px;overflow-y:auto}
+section.act{display:flex}
+.note{font-size:.8rem;color:var(--mut);margin:0 0 8px}
+#msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px 0 8px}
+.m{padding:10px 13px;border-radius:16px;max-width:88%;white-space:pre-wrap;overflow-wrap:anywhere}
+.u{background:var(--pri);color:var(--pi);align-self:flex-end;border-bottom-right-radius:5px}
+.b{background:var(--card);align-self:flex-start;border-bottom-left-radius:5px;border:1px solid var(--line)}
+.b.em{border:2px solid var(--sos)}
+.src{display:block;margin-top:8px;font-size:.78rem;color:var(--mut);border-top:1px solid var(--line);padding-top:6px}
+.dots span{display:inline-block;width:7px;height:7px;margin-right:4px;border-radius:50%;background:var(--mut);animation:d 1s infinite}
+.dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}
+@keyframes d{50%{transform:translateY(-4px);opacity:.4}}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.chips button,.opts button{border:1px solid var(--pri);background:transparent;color:var(--pri);border-radius:99px;padding:7px 13px;font-size:.88rem}
+.chips button:hover,.opts button:hover{background:var(--pri);color:var(--pi)}
+.opts{display:flex;gap:8px;margin-top:10px}
+.row{display:flex;gap:8px;padding-top:6px}
+input{flex:1;min-width:0;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit}
+.send{border:0;background:var(--pri);color:var(--pi);border-radius:14px;padding:0 18px;font-weight:600}
+:focus-visible{outline:3px solid var(--wa);outline-offset:2px}
+/* historial */
+#dr{position:absolute;inset:0;z-index:10;display:none}
+#dr.open{display:flex}
+#dr aside{width:82%;background:var(--card);padding:14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
+#dr .scrim{flex:1;background:#0007}
+#hl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+#hl li{display:flex;gap:4px}
+#hl li button:first-child{flex:1;text-align:left;border:0;background:var(--bg);color:var(--ink);border-radius:10px;padding:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#hl li button:first-child small{display:block;color:var(--mut)}
+#hl li button:last-child{border:0;background:none;color:var(--mut)}
+.emp{color:var(--mut);font-size:.9rem}
+.full{border:0;background:var(--pri);color:var(--pi);border-radius:12px;padding:11px;font-weight:600}
+.danger{border:1px solid var(--sos);background:none;color:var(--sos);border-radius:12px;padding:10px}
+/* semaforo */
+.sem{display:flex;gap:18px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px}
+.light{background:#16262c;border-radius:40px;padding:12px 10px;display:flex;flex-direction:column;gap:10px}
+.l{width:46px;height:46px;border-radius:50%;opacity:.22;transition:opacity .4s,box-shadow .4s}
+.l.r{background:var(--sos)}.l.y{background:var(--wa)}.l.g{background:var(--ok)}
+.l.on{opacity:1;box-shadow:0 0 26px currentColor}
+.l.r.on{color:var(--sos)}.l.y.on{color:var(--wa)}.l.g.on{color:var(--ok)}
+.sem h2{font-size:1.2rem;margin-bottom:4px}
+.q{font-size:1.05rem;font-weight:600}
+.bar{height:5px;background:var(--off);border-radius:9px;margin:10px 0 12px;overflow:hidden}.bar i{display:block;height:100%;background:var(--pri);transition:width .3s}
+.opts.big button{flex:1;padding:12px;font-size:1rem}
+.res{margin-top:14px;padding:14px;border-radius:16px;background:var(--card);border:1px solid var(--line)}
+.res h3{margin-bottom:6px}
+.cta{display:block;text-align:center;text-decoration:none;background:var(--sos);color:#fff;border-radius:14px;padding:13px;font-weight:700;margin-top:10px}
+.cta.alt{background:var(--card);color:var(--sos);border:2px solid var(--sos)}
+.link{background:none;border:0;color:var(--pri);text-decoration:underline;margin-top:10px;padding:0}
+.sosbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;width:190px;height:190px;border-radius:50%;margin:10px auto 14px;background:var(--sos);color:#fff;text-decoration:none;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:2.6rem;font-weight:800;box-shadow:0 0 0 12px color-mix(in srgb,var(--sos) 18%,transparent);animation:p 2.4s infinite}
+.sosbtn small{font:600 .85rem system-ui;opacity:.9}
+@keyframes p{50%{box-shadow:0 0 0 22px color-mix(in srgb,var(--sos) 5%,transparent)}}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:10px}
+.box h3{font-size:1rem;margin-bottom:6px}.box ul{margin:0;padding-left:18px}
+details{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin-bottom:8px}
+summary{font-weight:600;cursor:pointer}details p{margin:8px 0 0}
+nav{display:flex;border-top:1px solid var(--line);background:var(--card)}
+nav button{flex:1;border:0;background:none;color:var(--mut);padding:10px 4px 12px;font-size:.78rem;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button b{font-size:1.35rem;font-weight:400}
+nav button.act{color:var(--pri);font-weight:700}
+nav button.sosb.act{color:var(--sos)}
+</style></head><body>
+<div id="sp"><svg viewBox="0 0 100 100" aria-hidden="true"><path fill="#fff" d="M38 6h24v32h32v24H62v32H38V62H6V38h32z"/></svg><h2>SaludIA</h2><p>Tu salud a un click</p></div>
+<div id="app">
+<header><button class="ib" id="menu" aria-label="Historial de chats">☰</button><h1>SaludIA</h1><span class="pill" id="demo" hidden>Demo</span><button class="ib" id="new" aria-label="Nuevo chat">＋</button></header>
+<div class="views">
+ <section id="v0" class="act">
+  <div id="msgs" aria-live="polite"></div>
+  <div class="chips" id="ex"></div>
+  <div class="row"><input id="q" placeholder="Escribí tu pregunta de salud…" maxlength="300" aria-label="Mensaje"><button class="send" id="send">Enviar</button></div>
+  <p class="note" style="margin:6px 0 0">Información general y educativa. No reemplaza a un profesional de la salud. No escribas datos personales.</p>
+ </section>
+ <section id="v1">
+  <div class="sem"><div class="light"><div class="l r"></div><div class="l y"></div><div class="l g"></div></div>
+   <div><h2>Semáforo de urgencia</h2><div class="note" style="margin:0">Respondé unas preguntas y te orientamos. No reemplaza a un profesional.</div></div></div>
+  <div id="tri" style="margin-top:14px"></div>
+ </section>
+ <section id="v2">
+  <a class="sosbtn" href="tel:107">107<small>Emergencias médicas</small></a>
+  <a class="cta alt" href="tel:911" style="margin:0 0 12px">Llamar al 911</a>
+  <div class="box"><h3>Llamá ya si hay</h3><ul><li>Dificultad para respirar o dolor de pecho</li><li>Pérdida de conocimiento o convulsiones</li><li>Sangrado abundante</li><li>Intoxicación o peligro de hacerte daño</li></ul></div>
+  <h3 style="margin:6px 0 8px">Primeros auxilios</h3>
+  <details><summary>Quemaduras</summary><p>Enfriá con agua corriente fría unos 20 minutos. No uses hielo, manteca ni pasta dental. No revientes las ampollas. Cubrí con un paño limpio.</p></details>
+  <details><summary>Heridas y cortes</summary><p>Presioná con un paño limpio y lavá con agua y jabón. Si sigue sangrando tras unos 10 minutos, buscá atención médica.</p></details>
+ </section>
+</div>
+<nav><button class="act" data-t="0"><b>💬</b>Consultar</button><button data-t="1"><b>🚦</b>Semáforo</button><button class="sosb" data-t="2"><b>🆘</b>SOS</button></nav>
+<div id="dr"><aside><button class="full" id="new2">＋ Nuevo chat</button><h3>Chats anteriores</h3><ul id="hl"></ul><p class="note">Se guardan solo en este dispositivo y se borran solos a los 30 días.</p><button class="danger" id="clr">Borrar todo mi historial</button></aside><div class="scrim" id="scrim"></div></div>
+</div>
+<script>
+// ===== CONFIG: pegá acá la URL de tu Worker de Cloudflare. Vacío = modo demo (sin IA real). Nunca pongas claves acá. =====
+var CFG={API_URL:"https://saludia-api.peteanmatias26.workers.dev",DAYS:30};
+var $=function(s){return document.querySelector(s)};
+function norm(t){return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")}
+var MS="Ministerio de Salud de la Nación",CR="Cruz Roja",OPS="OPS",K="saludia_chats_v2";
+var WEL="¡Hola! 👋 Soy SaludIA. Contame qué te pasa o qué querés saber sobre salud y te ayudo en el momento. Si no se resuelve, te digo cuándo conviene ir al médico.";
+var T=[
+{k:["quem","escald","ampolla"],o:CR,a:"Enfriá la zona con agua corriente fría (no helada) unos 20 minutos. No uses hielo, manteca ni pasta dental, y no revientes las ampollas. Cubrí con un paño limpio.\n\nBuscá atención médica si es grande, profunda, está en cara, manos o articulaciones, o si afecta a un niño pequeño."},
+{k:["herida","corte","cortar","cortaron","sangr","raspon"],o:CR,a:"Lavate las manos, presioná la herida con un paño limpio y lavala con agua y jabón. Si el sangrado no frena tras unos 10 minutos de presión, o la herida es profunda o muy sucia, buscá atención médica."},
+{k:["tos","tose","resfri","gripe","moco"],o:MS,a:"La tos suele acompañar resfríos y otras infecciones respiratorias leves. Ayuda descansar, tomar líquidos, ventilar los ambientes y lavarte las manos.",q:"¿Hace más de 2 o 3 semanas que tosés?",y:"Conviene que consultes a un médico: una tos que dura tanto necesita evaluación.",n:"Entonces probablemente sea algo pasajero. Descansá y tomá líquidos. Consultá si aparece fiebre alta que persiste, silbidos o dolor de pecho."},
+{k:["fiebre","febril","temperatura"],o:MS,a:"La fiebre es una señal de que el cuerpo está reaccionando, muchas veces a una infección. Descansá y tomá líquidos.",q:"¿Hace más de 3 días que tenés fiebre?",y:"Consultá a un médico. Si además hay rigidez de cuello, erupciones, confusión o falta de aire, buscá atención urgente.",n:"Seguí descansando e hidratándote y observá cómo evoluciona. Si empeora, consultá."},
+{k:["cabeza","cefalea","migrana"],o:MS,a:"Dormir bien, hidratarte, comer a horarios regulares y descansar la vista de las pantallas pueden ayudar.",q:"¿Empezó después de un golpe?",y:"Un dolor de cabeza tras un golpe es motivo para consultar a un médico. Si hay confusión o debilidad, es una urgencia: 911 o 107.",n:"Si es repentino e intenso, viene con fiebre y rigidez de cuello, o se repite seguido, consultá a un médico."},
+{k:["dorm","sueno","insomnio","descans"],o:MS,a:"En general se recomienda que los adolescentes duerman entre 8 y 10 horas por noche. Ayuda mantener horarios regulares, evitar pantallas antes de dormir y limitar la cafeína."},
+{k:["ansiedad","estres","nervio","examen","triste","animo"],o:OPS,a:"Hablar con una persona de confianza, dormir bien, moverte y mantener vínculos ayudan al bienestar emocional. Si la ansiedad o el estrés te impiden hacer tu vida diaria, pedí ayuda a un profesional de salud mental.\n\nSi pensás en hacerte daño, llamá al 911 o al 107 ahora."}
+];
+var EMERG=/(no respira|me cuesta respirar|inconsciente|desmay|dolor de pecho|convulsi|sangrado (fuerte|abundante)|veneno|intoxic|ahog|atragant|quiero morir|suicid|hacerme dano|sobredosis)/;
+var BLOCK=/(dosis|cuantos (mg|miligramos|pastillas)|que (medicamento|pastilla|remedio)|ibuprofeno|paracetamol|antibiotic|diagnostic|receta)/;
+var HEALTH=/(duele|dolor|molest|siento|sintoma|enferm|salud|medic|panza|estomag|vomit|diarrea|mareo|alerg|golpe|torci|esguince|picadura|hincha|infecc|garganta|oido|diente|muela|espalda|ojo|piel|cansad|nausea|asma|presion|embaraz|picor|grano)/;
+function retrieve(n){var w=n.split(/[^a-z0-9]+/);
+ return T.map(function(t){return{t:t,s:t.k.filter(function(k){return w.some(function(z){return k.length<=3?z===k:z.indexOf(k)===0})}).length}}).filter(function(x){return x.s}).sort(function(a,b){return b.s-a.s}).map(function(x){return x.t})}
+function local(n,f){
+ if(cur.pend&&/^(si|no)\b/.test(n)){var p=cur.pend;cur.pend=0;return{t:/^si/.test(n)?p.y:p.n,o:p.o}}
+ cur.pend=0;
+ if(BLOCK.test(n))return{t:"No puedo diagnosticar ni indicar medicamentos o dosis. Para eso, consultá a un médico/a o farmacéutico/a. Si querés, contame qué te pasa y te digo qué podés hacer en el momento."};
+ if(f.length){var t=f[0];cur.pend=t.q?t:0;return{t:t.a+(t.q?"\n\n"+t.q:"\n\nSi no mejora o empeora, consultá a un médico."),o:t.o}}
+ if(/^(hola|holi|buenas|buen dia|buenos dias|hey|que tal)/.test(n))return{t:"¡Hola! 💚 Contame qué te pasa o qué querés saber sobre salud."};
+ if(/(gracias|genial|buenisimo|dale)/.test(n))return{t:"¡De nada! Si algo no mejora, consultá a un médico. Acá estoy para lo que necesites. 💚"};
+ if(HEALTH.test(n))return{t:"Todavía no tengo ese tema en mis fuentes. Mientras tanto: descansá, tomá líquidos y observá cómo evolucionás. Si no mejora en un par de días, empeora o te preocupa, consultá a un médico. Si te cuesta respirar o es algo grave: 911 o 107."};
+ return{t:"Soy una app especializada en salud, así que con eso no te puedo ayudar. Pero si tenés alguna molestia o duda de primeros auxilios, sueño, alimentación o bienestar, contame. 💚"}}
+async function respond(text){var n=norm(text);
+ if(EMERG.test(n))return{t:"⚠️ Esto puede ser una emergencia. Llamá YA al 911 o al 107, o andá a la guardia más cercana. No esperes.",em:1};
+ var f=retrieve(n);
+ if(CFG.API_URL){try{var ms=cur.msgs.filter(function(m){return!m.w}).slice(-10).map(function(m){return{role:m.r==="u"?"user":"assistant",content:m.t}});
+  var r=await fetch(CFG.API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:ms,passages:f.map(function(t){return t.a})})});
+  var d=await r.json();if(d.answer)return{t:d.answer,o:f.length?f[0].o:""}}catch(e){}}
+ return local(n,f)}
+// ===== Chats e historial =====
+var chats=[],cur,busy=0;
+function nc(){return{id:Date.now(),ts:Date.now(),title:"Nuevo chat",msgs:[{r:"b",t:WEL,w:1}],pend:0}}
+function persist(){try{localStorage.setItem(K,JSON.stringify(chats.slice(0,40)))}catch(e){}}
+function load(){var lim=Date.now()-CFG.DAYS*864e5;try{chats=(JSON.parse(localStorage.getItem(K))||[]).filter(function(c){return c.ts>lim})}catch(e){chats=[]}persist()}
+function bub(m){var d=document.createElement("div");d.className="m "+m.r+(m.em?" em":"");d.textContent=m.t;
+ if(m.o){var s=document.createElement("span");s.className="src";s.textContent="✓ Fuente aprobada: "+m.o;d.appendChild(s)}
+ $("#msgs").appendChild(d);$("#msgs").scrollTop=1e6;return d}
+function render(){$("#msgs").innerHTML="";cur.msgs.forEach(bub)}
+function push(m){cur.msgs.push(m);bub(m);if(m.r==="u"&&chats.indexOf(cur)<0){chats.unshift(cur);cur.title=m.t.slice(0,40)}cur.ts=Date.now();if(chats.indexOf(cur)>=0)persist()}
+async function send(t){t=t.trim();if(!t||busy)return;busy=1;$("#q").value="";push({r:"u",t:t});
+ var w=document.createElement("div");w.className="m b";w.innerHTML='<span class="dots"><span></span><span></span><span></span></span>';$("#msgs").appendChild(w);$("#msgs").scrollTop=1e6;
+ var r=await respond(t);await new Promise(function(ok){setTimeout(ok,500)});w.remove();push({r:"b",t:r.t,o:r.o,em:r.em});busy=0}
+function hist(){var ul=$("#hl");ul.innerHTML="";
+ chats.slice().sort(function(a,b){return b.ts-a.ts}).forEach(function(c){var li=document.createElement("li"),b=document.createElement("button"),x=document.createElement("button"),s=document.createElement("small");
+  b.textContent=c.title;s.textContent=new Date(c.ts).toLocaleDateString("es-AR");b.appendChild(s);b.onclick=function(){cur=c;render();dr(0);tab(0)};
+  x.textContent="✕";x.setAttribute("aria-label","Borrar chat");x.onclick=function(){chats=chats.filter(function(k){return k!==c});if(cur===c){cur=nc();render()}persist();hist()};li.append(b,x);ul.appendChild(li)});
+ if(!chats.length)ul.innerHTML='<li class="emp">Todavía no hay chats guardados.</li>'}
+function dr(o){$("#dr").classList.toggle("open",!!o);if(o)hist()}
+function fresh(){cur=nc();render();dr(0);tab(0);$("#q").focus()}
+function tab(i){document.querySelectorAll("nav button,section").forEach(function(x){x.classList.remove("act")});document.querySelector('nav [data-t="'+i+'"]').classList.add("act");$("#v"+i).classList.add("act")}
+// ===== Semáforo =====
+var Q=[{t:"¿Te cuesta respirar o tenés dolor de pecho?",r:1},{t:"¿Perdiste el conocimiento, tenés convulsiones o estás confundido/a?",r:1},{t:"¿Tenés fiebre alta o síntomas hace más de 3 días?",r:2},{t:"¿Los síntomas empeoran o te preocupan mucho?",r:2}];
+var step=0,lvl=0;
+function light(n){document.querySelectorAll(".l").forEach(function(x,i){x.classList.toggle("on",i===n-1)})}
+function tri(){var el=$("#tri");el.innerHTML="";if(step>=Q.length||lvl===1)return done(el);var q=Q[step];
+ el.innerHTML='<div class="bar"><i style="width:'+(step/Q.length*100)+'%"></i></div><div class="q"></div><div class="opts big"><button>Sí</button><button>No</button></div>';
+ el.querySelector(".q").textContent=q.t;var b=el.querySelectorAll("button");
+ b[0].onclick=function(){lvl=q.r===1?1:(lvl||2);step++;tri()};b[1].onclick=function(){step++;tri()}}
+function done(el){var L=lvl||3,x={1:["Rojo: buscá ayuda ahora","Llamá al 911 o al 107, o andá a la guardia más cercana. No esperes."],2:["Amarillo: consultá pronto","Pedí turno o consultá a un médico en el día o los próximos días. Si empeora, andá a la guardia."],3:["Verde: observá y cuidate","Descansá, tomá líquidos y observá cómo evolucionás. Consultá si aparece alguna de las señales anteriores."]}[L];
+ light(L);el.innerHTML='<div class="res"><h3></h3><p></p></div>';el.querySelector("h3").textContent=x[0];el.querySelector("p").textContent=x[1];
+ if(L===1)el.querySelector(".res").insertAdjacentHTML("beforeend",'<a class="cta" href="tel:107">Llamar al 107</a><a class="cta alt" href="tel:911">Llamar al 911</a>');
+ el.insertAdjacentHTML("beforeend",'<button class="link" id="rs">Empezar de nuevo</button>');$("#rs").onclick=function(){step=0;lvl=0;light(0);tri()}}
+// ===== Init =====
+["Hola","Me quemé con agua caliente","Tengo mucha tos","¿Cuántas horas debería dormir?"].forEach(function(e){var b=document.createElement("button");b.textContent=e;b.onclick=function(){send(e)};$("#ex").appendChild(b)});
+$("#send").onclick=function(){send($("#q").value)};$("#q").onkeydown=function(e){if(e.key==="Enter")send($("#q").value)};
+$("#menu").onclick=function(){dr(1)};$("#scrim").onclick=function(){dr(0)};$("#new").onclick=fresh;$("#new2").onclick=fresh;
+$("#clr").onclick=function(){chats=[];persist();cur=nc();render();hist()};
+document.querySelectorAll("nav button").forEach(function(b){b.onclick=function(){tab(b.dataset.t)}});
+if(!CFG.API_URL)$("#demo").hidden=false;
+load();cur=nc();render();tri();
+setTimeout(function(){$("#sp").classList.add("out")},3600);$("#sp").onclick=function(){this.classList.add("out")};
+if("serviceWorker"in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(function(){});
+</script></body></html>
